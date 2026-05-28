@@ -10,18 +10,17 @@ class Show extends Component
 {
     public ?CorrespondenceThread $thread = null;
 
-    public function mount(int $thread)
+    public function mount(CorrespondenceThread $thread)
     {
         $user = Auth::user();
         $teamId = $user->currentTeam->id;
 
-        $this->thread = CorrespondenceThread::forTeam($teamId)
-            ->with(['items' => fn($q) => $q->orderBy('correspondence_date')->orderBy('created_at')])
-            ->find($thread);
-
-        if (!$this->thread) {
+        if ($thread->team_id !== $teamId) {
             return redirect()->route('correspondence.inbox');
         }
+
+        $thread->load(['items' => fn($q) => $q->orderBy('correspondence_date')->orderBy('created_at')]);
+        $this->thread = $thread;
 
         // Mark items as read
         $this->thread->items()->where('is_read', false)->update(['is_read' => true]);

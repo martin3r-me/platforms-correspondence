@@ -1,0 +1,27 @@
+{
+    "name": "martin3r/platform-module-correspondence",
+    "description": "Correspondence Module for Platform - External business correspondence management (emails, letters)",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Platform Team",
+            "email": "team@platform.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Platform\\Correspondence\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Platform\\Correspondence\\CorrespondenceServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

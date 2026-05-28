@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Platform\Core\Traits\Encryptable;
 use Platform\Media\Traits\HasMedia;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Platform\ActivityLog\Traits\LogsActivity;
 use Symfony\Component\Uid\UuidV7;
 
 class CorrespondenceItem extends Model
@@ -71,11 +70,6 @@ class CorrespondenceItem extends Model
         static::deleted(function (self $model) {
             $model->thread?->updateDenormalized();
         });
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logFillable()->logOnlyDirty();
     }
 
     public function team(): BelongsTo

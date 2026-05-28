@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Platform\Core\Traits\Encryptable;
 use Platform\Media\Traits\HasMedia;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Platform\ActivityLog\Traits\LogsActivity;
 use Symfony\Component\Uid\UuidV7;
 
 class CorrespondenceThread extends Model
@@ -49,11 +48,6 @@ class CorrespondenceThread extends Model
                 $model->uuid = $uuid;
             }
         });
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logFillable()->logOnlyDirty();
     }
 
     public function team(): BelongsTo

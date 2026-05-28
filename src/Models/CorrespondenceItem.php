@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Platform\Core\Traits\Encryptable;
-use Platform\Media\Traits\HasMedia;
 use Platform\ActivityLog\Traits\LogsActivity;
 use Symfony\Component\Uid\UuidV7;
 
 class CorrespondenceItem extends Model
 {
-    use SoftDeletes, LogsActivity, Encryptable, HasMedia;
+    use SoftDeletes, LogsActivity, Encryptable;
 
     protected $table = 'correspondence_items';
 

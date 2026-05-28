@@ -7,13 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Platform\Core\Traits\Encryptable;
-use Platform\Media\Traits\HasMedia;
 use Platform\ActivityLog\Traits\LogsActivity;
 use Symfony\Component\Uid\UuidV7;
 
 class CorrespondenceThread extends Model
 {
-    use SoftDeletes, LogsActivity, Encryptable, HasMedia;
+    use SoftDeletes, LogsActivity, Encryptable;
 
     protected $table = 'correspondence_threads';
 

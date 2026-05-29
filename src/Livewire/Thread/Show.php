@@ -26,6 +26,28 @@ class Show extends Component
         $this->thread->items()->where('is_read', false)->update(['is_read' => true]);
     }
 
+    public function deleteThread()
+    {
+        if (!$this->thread) {
+            return;
+        }
+
+        $subject = $this->thread->subject;
+
+        $this->thread->items()->delete();
+        $this->thread->delete();
+        $this->thread = null;
+
+        $this->dispatch('notify', [
+            'type' => 'info',
+            'message' => "Thread \"{$subject}\" wurde gelöscht.",
+        ]);
+
+        $this->dispatch('updateSidebar');
+
+        $this->redirect(route('correspondence.inbox'), navigate: true);
+    }
+
     public function rendered()
     {
         if ($this->thread) {

@@ -92,6 +92,7 @@ class CorrespondenceServiceProvider extends ServiceProvider
             $registry->register(new \Platform\Correspondence\Tools\SearchCorrespondenceTool());
             $registry->register(new \Platform\Correspondence\Tools\MergeThreadsTool());
             $registry->register(new \Platform\Correspondence\Tools\SplitThreadTool());
+            $registry->register(new \Platform\Correspondence\Tools\DeleteThreadTool());
         } catch (\Throwable $e) {
             \Log::warning('Correspondence: Tool-Registrierung fehlgeschlagen', ['error' => $e->getMessage()]);
         }

@@ -32,6 +32,14 @@
                             <span class="text-xs text-gray-400">Erstellt {{ $thread->created_at->diffForHumans() }}</span>
                         </div>
                     </div>
+                    <x-ui-confirm-button
+                        action="deleteThread"
+                        text="Löschen"
+                        confirmText="Wirklich löschen?"
+                        variant="danger"
+                        size="sm"
+                        :icon="@svg('heroicon-o-trash', 'w-4 h-4')->toHtml()"
+                    />
                 </div>
             </div>
 

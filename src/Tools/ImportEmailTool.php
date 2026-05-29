@@ -21,7 +21,7 @@ class ImportEmailTool implements ToolContract, ToolMetadataContract
 
     public function getDescription(): string
     {
-        return 'POST /correspondence/items/import_email - Importiert eine Email aus MS365-Daten. Dedup via provider_id. Automatisches Thread-Resolving (ms365_conversation_id, In-Reply-To/References, Subject-Matching).';
+        return 'POST /correspondence/items/import_email - Importiert eine Email aus MS365-Daten. Dedup via provider_id. Automatisches Thread-Resolving (ms365_conversation_id, In-Reply-To/References, Subject-Matching). Unterstützt to/cc/bcc als Array von {name, address}.';
     }
 
     public function getSchema(): array
@@ -47,11 +47,44 @@ class ImportEmailTool implements ToolContract, ToolMetadataContract
                 ],
                 'recipient_name' => [
                     'type' => 'string',
-                    'description' => 'Name des Empfängers.',
+                    'description' => 'Name des primären Empfängers (wird aus to[0] übernommen falls leer).',
                 ],
                 'recipient_email' => [
                     'type' => 'string',
-                    'description' => 'Email des Empfängers.',
+                    'description' => 'Email des primären Empfängers (wird aus to[0] übernommen falls leer).',
+                ],
+                'to' => [
+                    'type' => 'array',
+                    'description' => 'TO-Empfänger als Array von {name, address}.',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'name' => ['type' => 'string'],
+                            'address' => ['type' => 'string'],
+                        ],
+                    ],
+                ],
+                'cc' => [
+                    'type' => 'array',
+                    'description' => 'CC-Empfänger als Array von {name, address}.',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'name' => ['type' => 'string'],
+                            'address' => ['type' => 'string'],
+                        ],
+                    ],
+                ],
+                'bcc' => [
+                    'type' => 'array',
+                    'description' => 'BCC-Empfänger als Array von {name, address}.',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'name' => ['type' => 'string'],
+                            'address' => ['type' => 'string'],
+                        ],
+                    ],
                 ],
                 'body_text' => [
                     'type' => 'string',
@@ -146,6 +179,22 @@ class ImportEmailTool implements ToolContract, ToolMetadataContract
                 'headers' => $arguments['headers'] ?? [],
             ], $userId);
 
+            // Recipients
+            $to = $arguments['to'] ?? [];
+            $cc = $arguments['cc'] ?? [];
+            $bcc = $arguments['bcc'] ?? [];
+
+            $recipientName = $arguments['recipient_name'] ?? ($to[0]['name'] ?? null);
+            $recipientEmail = $arguments['recipient_email'] ?? ($to[0]['address'] ?? null);
+
+            // Build metadata
+            $metadata = [
+                'headers' => $arguments['headers'] ?? [],
+                'to' => $to,
+                'cc' => $cc,
+                'bcc' => $bcc,
+            ];
+
             // Create item
             $item = CorrespondenceItem::create([
                 'team_id' => $teamId,
@@ -155,13 +204,11 @@ class ImportEmailTool implements ToolContract, ToolMetadataContract
                 'direction' => $arguments['direction'] ?? 'inbound',
                 'sender_name' => $arguments['sender_name'] ?? null,
                 'sender_email' => $arguments['sender_email'] ?? null,
-                'recipient_name' => $arguments['recipient_name'] ?? null,
-                'recipient_email' => $arguments['recipient_email'] ?? null,
+                'recipient_name' => $recipientName,
+                'recipient_email' => $recipientEmail,
                 'body_text' => $arguments['body_text'] ?? null,
                 'body_html' => $arguments['body_html'] ?? null,
-                'metadata' => [
-                    'headers' => $arguments['headers'] ?? [],
-                ],
+                'metadata' => $metadata,
                 'provider' => 'ms365',
                 'provider_id' => $providerId,
                 'correspondence_date' => $arguments['correspondence_date'] ?? now()->toDateString(),

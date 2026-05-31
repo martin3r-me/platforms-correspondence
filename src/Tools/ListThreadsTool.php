@@ -9,6 +9,7 @@ use Platform\Core\Contracts\ToolResult;
 use Platform\Core\Tools\Concerns\HasStandardGetOperations;
 use Platform\Correspondence\Models\CorrespondenceThread;
 use Platform\Correspondence\Tools\Concerns\ResolvesCorrespondenceTeam;
+use Platform\Organization\Services\EntityDimensionBridge;
 
 class ListThreadsTool implements ToolContract, ToolMetadataContract
 {
@@ -44,6 +45,10 @@ class ListThreadsTool implements ToolContract, ToolMetadataContract
                         'enum' => ['email', 'letter'],
                         'description' => 'Optional: Filter nach Item-Typ (zeigt nur Threads die mindestens ein Item dieses Typs haben).',
                     ],
+                    'entity_id' => [
+                        'type' => 'integer',
+                        'description' => 'Direkter Filter: nur Threads die mit dieser Entity verknüpft sind (über Dimension-Links).',
+                    ],
                 ],
             ]
         );
@@ -67,6 +72,24 @@ class ListThreadsTool implements ToolContract, ToolMetadataContract
 
             if (!empty($arguments['type'])) {
                 $query->whereHas('items', fn($q) => $q->where('type', $arguments['type']));
+            }
+
+            if (!empty($arguments['entity_id'])) {
+                $links = EntityDimensionBridge::linksForEntity((int) $arguments['entity_id']);
+                $threadIds = $links->filter(fn($l) => $l->linkable_type === 'correspondence_thread'
+                        || $l->linkable_type === \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel('correspondence_thread')
+                    )
+                    ->pluck('linkable_id')->unique()->toArray();
+
+                if (empty($threadIds)) {
+                    return ToolResult::success([
+                        'threads' => [],
+                        'pagination' => ['total' => 0, 'per_page' => $arguments['per_page'] ?? 25, 'current_page' => 1, 'last_page' => 1],
+                        'entity_id' => $arguments['entity_id'],
+                        'team_id' => $teamId,
+                    ]);
+                }
+                $query->whereIn('id', $threadIds);
             }
 
             $this->applyStandardFilters($query, $arguments, [

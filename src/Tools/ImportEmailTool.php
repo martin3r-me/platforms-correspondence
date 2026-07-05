@@ -131,6 +131,10 @@ class ImportEmailTool implements ToolContract, ToolMetadataContract
                         ],
                     ],
                 ],
+                'entity_id' => [
+                    'type' => 'integer',
+                    'description' => 'Optional: Organization Entity-ID. Verknüpft den Thread direkt beim Import via DimensionLink und setzt Status auf "assigned".',
+                ],
             ],
             'required' => ['subject'],
         ];
@@ -216,6 +220,27 @@ class ImportEmailTool implements ToolContract, ToolMetadataContract
                 'created_by_user_id' => $userId,
             ]);
 
+            // Entity linking (optional)
+            $entityId = isset($arguments['entity_id']) ? (int) $arguments['entity_id'] : null;
+            $entityLinked = false;
+
+            if ($entityId) {
+                try {
+                    $link = \Platform\Organization\Services\EntityDimensionBridge::createLink(
+                        $entityId,
+                        'correspondence_thread',
+                        $thread->id
+                    );
+
+                    if ($link) {
+                        $thread->update(['status' => 'assigned']);
+                        $entityLinked = true;
+                    }
+                } catch (\Throwable $e) {
+                    // Entity linking is non-critical — import succeeds, linking fails silently
+                }
+            }
+
             return ToolResult::success([
                 'id' => $item->id,
                 'uuid' => $item->uuid,
@@ -223,7 +248,10 @@ class ImportEmailTool implements ToolContract, ToolMetadataContract
                 'thread_uuid' => $thread->uuid,
                 'thread_subject' => $thread->subject,
                 'duplicate' => false,
-                'message' => "Email importiert als Item #{$item->id} in Thread #{$thread->id}.",
+                'entity_id' => $entityId,
+                'entity_linked' => $entityLinked,
+                'message' => "Email importiert als Item #{$item->id} in Thread #{$thread->id}."
+                    . ($entityLinked ? " Thread wurde Entity #{$entityId} zugewiesen." : ''),
             ]);
         } catch (\Throwable $e) {
             return ToolResult::error('EXECUTION_ERROR', 'Fehler beim Email-Import: ' . $e->getMessage());

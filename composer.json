@@ -1,6 +1,7 @@
 {
     "name": "martin3r/platform-module-correspondence",
-    "description": "Correspondence Module for Platform - External business correspondence management (emails, letters)",
+    "description": "[DEPRECATED — superseded by martin3r/platform-inbox] Correspondence Module for Platform - External business correspondence management (emails, letters)",
+    "abandoned": "martin3r/platform-inbox",
     "type": "library",
     "license": "MIT",
     "authors": [

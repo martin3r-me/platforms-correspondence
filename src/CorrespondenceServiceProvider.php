@@ -3,7 +3,6 @@
 namespace Platform\Correspondence;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -39,7 +38,7 @@ class CorrespondenceServiceProvider extends ServiceProvider
         if (
             config()->has('correspondence.routing') &&
             config()->has('correspondence.navigation') &&
-            Schema::hasTable('modules')
+            PlatformCore::modulesTableExists()
         ) {
             PlatformCore::registerModule([
                 'key' => 'correspondence',
